@@ -7,7 +7,7 @@ BUFFER_SIZE = 4096
 
 
 def download_file(file_name):
-    # 1️⃣ Index Server'a bağlan
+    # Index Server'a bağlan
     # Index Server'a bağlan
     index_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     index_sock.connect((INDEX_IP, INDEX_PORT))
@@ -21,7 +21,7 @@ def download_file(file_name):
 
 
     if response.startswith("ERROR"):
-        print("❌ Index Server:", response)
+        print("Index Server:", response)
         return
 
     # SERVER <ip> <port> <server_id> <file_size>
@@ -30,9 +30,9 @@ def download_file(file_name):
     server_port = int(parts[2])
     file_size = int(parts[4])
 
-    print(f"✅ Dosya bulundu → {server_ip}:{server_port} ({file_size} byte)")
+    print(f"File found → {server_ip}:{server_port} ({file_size} byte)")
 
-    # 2️⃣ Content Server'a bağlan
+    # Content Server'a bağlan
     content_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     content_sock.connect((server_ip, server_port))
 
@@ -41,7 +41,7 @@ def download_file(file_name):
     header = content_sock.recv(BUFFER_SIZE).decode().strip()
 
     if header.startswith("ERROR"):
-        print("❌ Content Server:", header)
+        print("Content Server:", header)
         content_sock.close()
         return
 
@@ -65,12 +65,12 @@ def download_file(file_name):
     with open(file_name, "wb") as f:
         f.write(data)
 
-    print(f"📁 Dosya indirildi: {file_name} ({received} byte)")
+    print(f"File downloaded: {file_name} ({received} byte)")
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Kullanım: python client.py <dosya_adi>")
+        print("Usage: python client.py <dosya_adi>")
         sys.exit(1)
 
     download_file(sys.argv[1])

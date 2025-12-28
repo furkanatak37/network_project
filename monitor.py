@@ -17,7 +17,7 @@ index_connections = []  # Index Server TCP bağlantıları
 def udp_listener():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("", UDP_PORT))
-    print(f"🩺 Monitor UDP dinliyor: {UDP_PORT}")
+    print(f"🩺 Monitor UDP listening: {UDP_PORT}")
 
     while True:
         data, _ = sock.recvfrom(BUFFER_SIZE)
@@ -48,7 +48,7 @@ def timeout_checker():
             for server_id, info in list(servers.items()):
                 if info["status"] == "ALIVE" and now - info["last_seen"] > TIMEOUT:
                     info["status"] = "DEAD"
-                    print(f"❌ SERVER DOWN: {server_id}")
+                    print(f"SERVER DOWN: {server_id}")
                     notify_index(server_id)
 
 
@@ -87,7 +87,7 @@ def tcp_server():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("", TCP_PORT))
     sock.listen(5)
-    print(f"🩺 Monitor TCP dinliyor: {TCP_PORT}")
+    print(f"🩺 Monitor TCP listening: {TCP_PORT}")
 
     while True:
         conn, _ = sock.accept()

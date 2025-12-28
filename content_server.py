@@ -56,7 +56,7 @@ def tcp_server(tcp_port, files_dir):
     server.bind(("", tcp_port))
     server.listen(5)
 
-    print(f"📦 Content Server TCP dinliyor: {tcp_port}")
+    print(f"Content Server TCP listening: {tcp_port}")
 
     while True:
         conn, addr = server.accept()
@@ -102,13 +102,13 @@ def register_with_index(server_id, tcp_port, udp_port, files_dir):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Kullanım: python content_server.py <server_id> <tcp_port> <files_dir>")
+        print("Usage: python content_server.py <server_id> <tcp_port> <files_dir>")
         sys.exit(1)
 
     server_id = sys.argv[1]
     tcp_port = int(sys.argv[2])
     files_dir = sys.argv[3]
-    udp_port = tcp_port + 1  # basitlik için
+    udp_port = tcp_port + 1
 
     register_with_index(server_id, tcp_port, udp_port, files_dir)
 

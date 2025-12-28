@@ -72,7 +72,7 @@ def handle_connection(conn):
                 with lock:
                     if server_id in servers:
                         servers[server_id]["status"] = "DEAD"
-                        print(f"❌ Index: {server_id} DEAD")
+                        print(f"Index: {server_id} DEAD")
 
             else:
                 conn.sendall(b"ERROR UNKNOWN_COMMAND\n")
@@ -84,7 +84,7 @@ def handle_connection(conn):
 def connect_to_monitor():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((MONITOR_IP, MONITOR_TCP_PORT))
-    print("📡 Index → Monitor bağlı")
+    print("📡 Index → Monitor connected")
 
     while True:
         data = sock.recv(BUFFER_SIZE)
@@ -97,14 +97,14 @@ def connect_to_monitor():
             with lock:
                 if server_id in servers:
                     servers[server_id]["status"] = "DEAD"
-                    print(f"❌ Monitor bildirdi: {server_id} DOWN")
+                    print(f"Monitor notification: {server_id} DOWN")
 
 
 def tcp_server():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("", INDEX_PORT))
     sock.listen(10)
-    print(f"📚 Index Server dinliyor: {INDEX_PORT}")
+    print(f"📚 Index Server listening: {INDEX_PORT}")
 
     while True:
         conn, _ = sock.accept()
