@@ -19,23 +19,24 @@ lock = threading.Lock()
 def handle_client(conn, addr, files_dir):
     global active_clients
 
+    print(f"->Client connected from {addr}")
+
     with lock:
         active_clients += 1
 
     try:
         request = conn.recv(BUFFER_SIZE).decode().strip()
-        if not request.startswith("GET"):
-            conn.sendall(b"ERROR INVALID_COMMAND\n")
-            return
-
         _, file_name = request.split()
+
         file_path = os.path.join(files_dir, file_name)
 
         if not os.path.exists(file_path):
+            print(f" File not found: {file_name}")
             conn.sendall(b"ERROR FILE_NOT_FOUND\n")
             return
 
         file_size = os.path.getsize(file_path)
+        print(f"-> Sending file: {file_name} ({file_size} bytes)")
         conn.sendall(f"OK {file_size}\n".encode())
 
         with open(file_path, "rb") as f:
@@ -44,11 +45,15 @@ def handle_client(conn, addr, files_dir):
                 if not data:
                     break
                 conn.sendall(data)
+                time.sleep(2)
+
 
     finally:
         conn.close()
         with lock:
             active_clients -= 1
+        print(f"🔌 Client disconnected: {addr}")
+
 
 
 def tcp_server(tcp_port, files_dir):
