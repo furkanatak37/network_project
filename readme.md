@@ -1,144 +1,135 @@
-# Micro CDN - Simple File Distribution System
+PROJECT TITLE
+  Micro-CDN / File Distribution System
 
-This project is a simple Micro-CDN implementation written in Python.
-It simulates how a Content Delivery Network works using sockets.
+PROJECT OVERVIEW
+  This project implements a simplified Content Delivery Network (Micro-CDN).
+  Clients request files from an Index Server, which tracks available Content Servers.
+  Files are transferred directly from Content Servers to Clients using TCP.
+  A Monitor Server tracks server health using UDP heartbeats and informs the Index Server when failures occur.
 
-Components:
-- Index Server
-- Content Servers (multiple)
-- Monitor / Health Server
-- Client
+  The system demonstrates socket programming with TCP and UDP, concurrency, basic protocol design, and failure handling in a distributed system.
 
-All communication is done using TCP and UDP sockets.
-The system runs on localhost and is intended for educational testing.
-
---------------------------------------------------
-Requirements
---------------------------------------------------
-
-- Python 3.8 or newer
-- No external libraries are required
-- Works on Linux, macOS, and Windows
-
---------------------------------------------------
-Project Files
---------------------------------------------------
-
-- index_server.py
-  Keeps track of content servers and which files they host.
-  Handles client file lookup requests.
-
-- content_server.py
-  Hosts files and sends them to clients over TCP.
-  Sends heartbeat messages to the monitor over UDP.
-
-- monitor.py
-  Receives heartbeats from content servers.
-  Detects server failures and notifies the index server.
-
-- client.py
-  Requests a file from the index server.
-  Downloads the file from the selected content server.
-
---------------------------------------------------
-Default Ports
---------------------------------------------------
+SYSTEM COMPONENTS
 
 Index Server:
-- TCP 5000
 
-Monitor Server:
-- UDP 6000
-- TCP 6001
+  The Index Server acts as a tracker.
+  It maintains a mapping of file names to Content Servers and handles client lookup requests.
+  It also updates server availability based on notifications from the Monitor Server.
 
-Content Servers:
-- TCP port is provided as an argument
-- UDP port is TCP port + 1
+Content Server:
 
---------------------------------------------------
-How to Run the CDN (Step by Step)
---------------------------------------------------
+  Content Servers host files and serve them to clients over TCP.
+  They register themselves with the Index Server and periodically send heartbeat messages to the Monitor Server using UDP.
+  Multiple Content Servers can run simultaneously.
 
-1) Start the Monitor Server
+Monitor / Health Server: 
 
-Open a terminal and run:
-python monitor.py
+  The Monitor Server tracks which Content Servers are alive.
+  It receives heartbeat messages over UDP and detects server failures based on missed heartbeats.
+  It notifies the Index Server when a Content Server is considered dead.
 
-You should see:
-Monitor UDP listening: 6000
-Monitor TCP listening: 6001
+Client Program:
 
---------------------------------------------------
+  The Client requests a file from the Index Server and, if available, downloads it from the appropriate Content Server.
 
-2) Start the Index Server
+REQUIREMENTS
 
-Open a new terminal and run:
-python index_server.py
+  Python 3.8 or later
 
-You should see:
-Index Server listening: 5000
-Index -> Monitor connected
+  Standard Python libraries only (socket, threading, time, os, sys)
 
---------------------------------------------------
+  No external dependencies
 
-3) Prepare Content Server Files
+DEFAULT PORT CONFIGURATION
 
-Create one or more folders, for example:
-server1_files/
-server2_files/
+Index Server
 
-Put some test files inside them, for example:
-test.txt
-hello.bin
+  TCP: 5000
 
---------------------------------------------------
+Monitor Server
 
-4) Start Content Servers
+  UDP: 6000
 
-Open new terminals for each content server.
+  TCP: 6001
 
-Example for server 1:
-python content_server.py server1 7001 server1_files
+Content Server
 
-Example for server 2:
-python content_server.py server2 7101 server2_files
+  TCP: configurable (example: 7001, 7101)
 
-Each content server will:
-- Register itself with the Index Server
-- Send its file list
-- Start sending heartbeats to the Monitor
+  UDP: TCP port + 1
 
---------------------------------------------------
+  All components may run on localhost for testing.
 
-5) Run the Client
+HOW TO RUN
 
-Open another terminal and run:
-python client.py test.txt
+  Start the Monitor Server
+  Run the following command in a terminal:
+  python monitor.py
 
-If the file exists on any live content server:
-- The client will contact the Index Server
-- Connect to the Content Server
-- Download and save the file locally
+  Start the Index Server
+  Run the following command in a terminal:
+  python index_server.py
 
-If the file does not exist:
-- An error message is printed
+  Start Content Servers
+  At least two Content Servers must be started.
+  Each Content Server must have its own file directory.
 
---------------------------------------------------
-How to Test Failure Handling
---------------------------------------------------
+  Example:
+  python content_server.py server1 7001 files1/
+  python content_server.py server2 7101 files2/
 
-1) Start all servers as described above
-2) Run the client and download a file successfully
-3) Kill one content server (Ctrl+C)
-4) Wait around 8 seconds
-5) The Monitor will mark the server as DEAD
-6) The Index Server will stop using that server
-7) Run the client again and observe behavior
+  Run the Client
+  Run the client to download a file:
+  python client.py <file_name>
 
---------------------------------------------------
-Notes
---------------------------------------------------
+  The downloaded file will be saved in the client’s current directory.
 
-- All messages are simple text-based protocol messages
-- Content Servers support multiple clients using threads
-- This project is for learning purposes and not production use
+COMMAND LINE ARGUMENTS
+
+  Content Server
+  python content_server.py <server_id> <tcp_port> <files_directory>
+
+  Client
+  python client.py <file_name>
+
+PROTOCOL SUMMARY
+
+  All messages are ASCII text terminated by newline characters.
+
+TCP is used for:
+
+  Client to Index Server communication
+
+  Client to Content Server file transfer
+
+  Index Server to Monitor communication
+
+UDP is used for:
+
+  Content Server heartbeat messages to the Monitor
+
+  ERROR HANDLING AND ROBUSTNESS
+
+  Invalid commands return an error message.
+
+  Requests for non-existent files return ERROR FILE_NOT_FOUND.
+
+  Client disconnections are handled.
+
+  Content Server failures are detected automatically via missed heartbeats.
+
+  The Index Server avoids routing clients to servers marked as DEAD.
+
+TESTING
+
+  The system was tested using multiple concurrent clients, multiple Content Servers, and simulated server failures.
+  The Monitor successfully detects failed servers, and the Index Server stops routing requests to them.
+
+NOTES
+
+  Raw sockets are used; no HTTP libraries or frameworks are involved.
+
+  Concurrency is implemented using threads.
+
+  The system can be extended with caching, replication, or chunked file transfer.
